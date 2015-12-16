@@ -70,36 +70,43 @@ print(len(validWords),' valid words')
 #freqCriterion = 3
 #validWordFreq > freqCriterion 
 
-wordsForNotCompound = wordsHalfAsManyLtrs[~wordsHalfAsManyLtrs['Word'].isin(words['firstHalf']) | ~wordsHalfAsManyLtrs['Word'].isin(words['secondHalf'])]
-wordsForNotCompound = wordsForNotCompound.reset_index(drop=True)
+wordsForPseudoCompound = wordsHalfAsManyLtrs[~wordsHalfAsManyLtrs['Word'].isin(words['firstHalf']) | ~wordsHalfAsManyLtrs['Word'].isin(words['secondHalf'])]
+wordsForPseudoCompound = wordsForPseudoCompound.reset_index(drop=True)
 
-wordsForNotCompound = wordsForNotCompound[~wordsForNotCompound['Word'].str[0].isin(uppercase)]
-wordsForNotCompound = wordsForNotCompound.reset_index(drop=True)
+wordsForPseudoCompound = wordsForPseudoCompound[~wordsForPseudoCompound['Word'].str[0].isin(uppercase)]
+wordsForPseudoCompound = wordsForPseudoCompound.reset_index(drop=True)
 
-wordsForNotCompound = wordsForNotCompound[wordsForNotCompound['Log_Freq_HAL']>5] #mean log HAL is ~8, SD is ~ 2, don't want low freq words in list
-wordsForNotCompound = wordsForNotCompound.reset_index(drop=True)
+wordsForPseudoCompound = wordsForPseudoCompound[wordsForPseudoCompound['Log_Freq_HAL']>5] #mean log HAL is ~8, SD is ~ 2, don't want low freq words in list
+wordsForPseudoCompound = wordsForPseudoCompound.reset_index(drop=True)
 
-idxShuffled = range(len(wordsForNotCompound))
+idxShuffled = range(len(wordsForPseudoCompound))
 
 shuffle(idxShuffled)
 
 print(idxShuffled)
 
-wordsForNotCompound = wordsForNotCompound.iloc[idxShuffled,]
-wordsForNotCompound = wordsForNotCompound.reset_index(drop=True)
-print(wordsForNotCompound)
+wordsForPseudoCompound = wordsForPseudoCompound.iloc[idxShuffled,]
+wordsForPseudoCompound = wordsForPseudoCompound.reset_index(drop=True)
+#print(wordsForPseudoCompound)
 
-print(wordsForNotCompound['Word'][0:len(wordsForNotCompound)/2])
+#print(wordsForPseudoCompound['Word'][0:len(wordsForPseudoCompound)/2])
 
 
 
-FirstPseudo = pd.DataFrame(wordsForNotCompound['Word'][0:len(wordsForNotCompound)/2])
-SecondPseudo = pd.DataFrame(wordsForNotCompound['Word'][len(wordsForNotCompound)/2:len(wordsForNotCompound)])
-
+FirstPseudo = wordsForPseudoCompound['Word'][0:len(wordsForPseudoCompound)/2]
+FirstPseudo = FirstPseudo.reset_index(drop=True)
+SecondPseudo = wordsForPseudoCompound['Word'][len(wordsForPseudoCompound)/2:len(wordsForPseudoCompound)]
+SecondPseudo = SecondPseudo.reset_index(drop=True)
+print(SecondPseudo)
 
 ##NOT WORKING FROM HERE ON
-pseudoCompounds = FirstPseudo.merge(SecondPseudo, how='left')
+pseudoCompounds = pd.DataFrame()
+pseudoCompounds['First'] = FirstPseudo
+pseudoCompounds['Second'] = SecondPseudo
+pseudoCompounds['pseudo'] = pseudoCompounds['First']+pseudoCompounds['Second']
 
+for realWord in pseudoCompounds['pseudo'][pseudoCompounds['pseudo'].isin(words['Word'])]:
+    print('"'+realWord+'"'+' is a real word')
 
 print(pseudoCompounds)
 #print(wordsForNotCompound)
