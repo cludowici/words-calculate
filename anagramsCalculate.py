@@ -47,10 +47,10 @@ if type(wordsHalfAsManyLtrs['Word'].irow(-1)) is not str: #sometimes last row is
     wordsHalfAsManyLtrs = wordsHalfAsManyLtrs[:-1] #remove last item
 
 #For each  word, find out whether both firsthalf and second half is a word
-ngrams = wordsHalfAsManyLtrs['Word'].astype(str)
-ngrams = list(ngrams)
-ngrams = [ x.upper() for x in ngrams ]
-print('ngrams=',ngrams)
+halfLengthWords = wordsHalfAsManyLtrs['Word'].astype(str)
+halfLengthWords = list(halfLengthWords)
+halfLengthWords = [ x.upper() for x in halfLengthWords ] #change to upper case
+print('halfLengthWords=',halfLengthWords)
 validWords = []
 validWordsFreq = []
 print('words with both halves legal:')
@@ -60,7 +60,7 @@ for i in range(len(words)):
     secondHalf = words['secondHalf'][i].upper()
     if i==0:
         print('example firstHalf=',firstHalf,' secondHalf=',secondHalf)
-    if firstHalf in ngrams and secondHalf in ngrams:
+    if firstHalf in halfLengthWords and secondHalf in halfLengthWords:
         print(words['Word'][i])
         validWords.append(firstHalf+secondHalf)
         #validWordFreq.append(words['frequency'][i])
@@ -69,8 +69,9 @@ print(len(validWords),' valid words')
 #freqCriterion = 3
 #validWordFreq > freqCriterion 
 
+#check whether the half words can be combined in either order to form a legal word
 reverseWords = []
-print('words whose anagram is legall:')
+print('words whose half-word can be put in either order to form a legal word:')
 for i in range(len(words)):
     firstHalf = words['firstHalf'][i].upper()
     #print('firstHalf=',firstHalf)
