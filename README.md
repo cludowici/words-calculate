@@ -10,4 +10,4 @@ the long list.
 * ~~Somehow exclude place names, proper names from eight-letter list.~~
 * Somehow classify each eight-letter word as true compound word, or whatever the other things are called.
 * Make list of four-letter-word pairs that put together, don't make a word.
-\n * remove contractions etc. from all lists
+* remove contractions etc. from all lists
