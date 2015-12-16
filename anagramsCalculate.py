@@ -1,27 +1,35 @@
 from __future__ import print_function
 import pandas as pd
 import os
+
+#This program will find all the compound words in a long list of words, by
+#taking the lexicon of all half-as-many-letters words and checking them against 
+#the long list.
+
+print(os.getcwd()) #os.chdir() If using within psychopy, might start out in wrong directory
+dir='words_from_databases/'
 fname = '8letterWordsFromElexicon'
-words=pd.read_csv(fname+'.csv')
-wordsHalfAsManyLtrs = pd.read_csv('4letterWordsFromElexicon.csv')
+#Read in all the words (downloaded before from Elexicon
+words=pd.read_csv(dir+fname+'.csv')
+#Read in all the words with half as many letters
+wordsHalfAsManyLtrs = pd.read_csv(dir+'4letterWordsFromElexicon.csv')
 
 #words.to_pickle(fname+'.pickle')
 #words = pd.read_pickle(fname+'.pickle')
 if type(words['Word'].irow(-1)) is not str: #sometimes last row is bad, probably because carriage return at end
     words = words[:-1]
     
-    
 wordsList =  words['Word'].astype(str) #put them into a list
 wordsList = list( wordsList )
-wordsList = [ x.upper() for x in wordsList ]
+wordsList = [ x.upper() for x in wordsList ] #change to upper case
 
 numLtrs = words['Length'][0] 
 halfNumLtrs = int(numLtrs/2)
 print('words=',words)
-words['Word'][:halfNumLtrs+1]
 words['firstHalf'] = 'ZZZZZ'
 words['secondHalf'] = 'ZZZZZ'
-#words['firstHalf'][1] = 'N'
+#Loop through all words, dividing them into first half and second half
+#Add first and second half to same pandas dataframe
 for i in  range( len(words) ):
     thisWord = words['Word'][i]
     #print('thisWord=',thisWord)
@@ -32,14 +40,13 @@ for i in  range( len(words) ):
         print(e)
         print('i=',i)
     words['secondHalf'][i] = thisWord[halfNumLtrs:]
-#str(words['Word'])
 print('words.head=',words.head())
-print('words.tail=',words.tail())
+#print('words.tail=',words.tail())
 
 if type(wordsHalfAsManyLtrs['Word'].irow(-1)) is not str: #sometimes last row is bad, probably because carriage return at end
-    wordsHalfAsManyLtrs = wordsHalfAsManyLtrs[:-1]
-print('words3ltrs.head()=',wordsHalfAsManyLtrs)
-#For each  word, check if both firsthalf and second half is a word
+    wordsHalfAsManyLtrs = wordsHalfAsManyLtrs[:-1] #remove last item
+
+#For each  word, find out whether both firsthalf and second half is a word
 ngrams = wordsHalfAsManyLtrs['Word'].astype(str)
 ngrams = list(ngrams)
 ngrams = [ x.upper() for x in ngrams ]
