@@ -2,11 +2,15 @@ from __future__ import print_function
 import pandas as pd
 import os
 from string import ascii_uppercase
+from numpy.random import shuffle
+
 workDir = os.getcwd()
 sep = os.sep
 fname = '8letterWordsFromElexicon'
 words=pd.read_csv('words_from_databases'+sep+fname+'.csv')
 wordsHalfAsManyLtrs = pd.read_csv('words_from_databases'+sep+'4letterWordsFromElexicon.csv')
+
+uppercase = [char for char in ascii_uppercase]
 
 #words.to_pickle(fname+'.pickle')
 #words = pd.read_pickle(fname+'.pickle')
@@ -21,7 +25,7 @@ words['firstHalf'] = words['Word'].str[0:halfNumLtrs]
 words['secondHalf'] = words['Word'].str[halfNumLtrs:numLtrs]
 
 print(words)
-properNouns =[word for word in words['Word'] if  word[0] in ascii_uppercase]
+properNouns =[word for word in words['Word'] if  word[0] in uppercase]
 
 #remove properNouns (or words with initial capital letters) from words
 
@@ -30,9 +34,9 @@ properNounBoolean = words['Word'].isin(properNouns) #single logical column df of
 properNounBooleanInvert = ~properNounBoolean #reverse that, we only want the words that aren't in properNouns
 
 words = words[properNounBooleanInvert]
-words = words.reset_index() #otherwise the indexes have gaps where the properNouns were removed
+words = words.reset_index(drop=True) #otherwise the indexes have gaps where the properNouns were removed
 
-#words.to_csv(path_or_buf=workDir+sep+'words.csv')
+words.to_csv(path_or_buf=workDir+sep+'words.csv')
 
 
 
@@ -53,7 +57,7 @@ validWordsFreq = []
 #print('words with both halves legal:')
 for i in range(len(words)):
     firstHalf = words['firstHalf'][i].upper()
-    print('firstHalf=',firstHalf)
+    #print('firstHalf=',firstHalf)
     secondHalf = words['secondHalf'][i].upper()
     if i==0:
         print('example firstHalf=',firstHalf,' secondHalf=',secondHalf)
@@ -66,5 +70,36 @@ print(len(validWords),' valid words')
 #freqCriterion = 3
 #validWordFreq > freqCriterion 
 
+wordsForNotCompound = wordsHalfAsManyLtrs[~wordsHalfAsManyLtrs['Word'].isin(words['firstHalf']) | ~wordsHalfAsManyLtrs['Word'].isin(words['secondHalf'])]
+wordsForNotCompound = wordsForNotCompound.reset_index(drop=True)
+
+wordsForNotCompound = wordsForNotCompound[~wordsForNotCompound['Word'].str[0].isin(uppercase)]
+wordsForNotCompound = wordsForNotCompound.reset_index(drop=True)
+
+wordsForNotCompound = wordsForNotCompound[wordsForNotCompound['Log_Freq_HAL']>5] #mean log HAL is ~8, SD is ~ 2, don't want low freq words in list
+wordsForNotCompound = wordsForNotCompound.reset_index(drop=True)
+
+idxShuffled = range(len(wordsForNotCompound))
+
+shuffle(idxShuffled)
+
+print(idxShuffled)
+
+wordsForNotCompound = wordsForNotCompound.iloc[idxShuffled,]
+wordsForNotCompound = wordsForNotCompound.reset_index(drop=True)
+print(wordsForNotCompound)
+
+print(wordsForNotCompound['Word'][0:len(wordsForNotCompound)/2])
 
 
+
+FirstPseudo = pd.DataFrame(wordsForNotCompound['Word'][0:len(wordsForNotCompound)/2])
+SecondPseudo = pd.DataFrame(wordsForNotCompound['Word'][len(wordsForNotCompound)/2:len(wordsForNotCompound)])
+
+
+##NOT WORKING FROM HERE ON
+pseudoCompounds = FirstPseudo.merge(SecondPseudo, how='left')
+
+
+print(pseudoCompounds)
+#print(wordsForNotCompound)
