@@ -2,7 +2,7 @@ from __future__ import print_function
 import pandas as pd
 import os
 from string import ascii_uppercase
-from numpy.random import shuffle
+from numpy.random import shuffle, choice
 
 workDir = os.getcwd()
 sep = os.sep
@@ -66,24 +66,38 @@ for i in range(len(words)):
         validWords.append(firstHalf+secondHalf)
         #validWordFreq.append(words['frequency'][i])
 print(len(validWords),' valid words')
+print(validWords)
+
+
+validWordInfo = words
+validWordInfo['Word'] = validWordInfo['Word'].str.upper()
+validWordInfo = validWordInfo[validWordInfo['Word'].isin(validWords)]
+validWordInfo.to_csv(path_or_buf='Output/Valid_words.csv', index=False)
 
 #freqCriterion = 3
 #validWordFreq > freqCriterion 
 
 wordsForPseudoCompound = wordsHalfAsManyLtrs[~wordsHalfAsManyLtrs['Word'].isin(words['firstHalf']) | ~wordsHalfAsManyLtrs['Word'].isin(words['secondHalf'])]
+
+if len(wordsForPseudoCompound)%2!=0:
+    wordsForPseudoCompound.drop([choice(range(len(wordsForPseudoCompound)),1)]) #drop a random row if there isn't an even number of rows
+    wordsForPseudoCompound.reset_index(drop=True)
+
+
+wordsForPseudoCompound = wordsForPseudoCompound.reset_index(drop=True)
+wordsForPseudoCompound = wordsForPseudoCompound[-wordsForPseudoCompound['Word'].str.contains("'")]
 wordsForPseudoCompound = wordsForPseudoCompound.reset_index(drop=True)
 
 wordsForPseudoCompound = wordsForPseudoCompound[~wordsForPseudoCompound['Word'].str[0].isin(uppercase)]
 wordsForPseudoCompound = wordsForPseudoCompound.reset_index(drop=True)
 
-wordsForPseudoCompound = wordsForPseudoCompound[wordsForPseudoCompound['Log_Freq_HAL']>5] #mean log HAL is ~8, SD is ~ 2, don't want low freq words in list
-wordsForPseudoCompound = wordsForPseudoCompound.reset_index(drop=True)
+# wordsForPseudoCompound = wordsForPseudoCompound[wordsForPseudoCompound['Log_Freq_HAL']>5] #mean log HAL is ~8, SD is ~ 2, don't want low freq words in list
+# wordsForPseudoCompound = wordsForPseudoCompound.reset_index(drop=True)
 
 idxShuffled = range(len(wordsForPseudoCompound))
 
 shuffle(idxShuffled)
 
-print(idxShuffled)
 
 wordsForPseudoCompound = wordsForPseudoCompound.iloc[idxShuffled,]
 wordsForPseudoCompound = wordsForPseudoCompound.reset_index(drop=True)
@@ -97,7 +111,6 @@ FirstPseudo = wordsForPseudoCompound['Word'][0:len(wordsForPseudoCompound)/2]
 FirstPseudo = FirstPseudo.reset_index(drop=True)
 SecondPseudo = wordsForPseudoCompound['Word'][len(wordsForPseudoCompound)/2:len(wordsForPseudoCompound)]
 SecondPseudo = SecondPseudo.reset_index(drop=True)
-print(SecondPseudo)
 
 ##NOT WORKING FROM HERE ON
 pseudoCompounds = pd.DataFrame()
@@ -108,5 +121,6 @@ pseudoCompounds['pseudo'] = pseudoCompounds['First']+pseudoCompounds['Second']
 for realWord in pseudoCompounds['pseudo'][pseudoCompounds['pseudo'].isin(words['Word'])]:
     print('"'+realWord+'"'+' is a real word')
 
+pseudoCompounds.to_csv(path_or_buf='Output/pseudoCompounds.csv', index=False)
 print(pseudoCompounds)
 #print(wordsForNotCompound)
