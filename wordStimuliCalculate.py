@@ -4,6 +4,8 @@ import os
 from string import ascii_uppercase
 from numpy.random import shuffle, choice
 
+#test test test
+
 workDir = os.getcwd()
 sep = os.sep
 fname = '8letterWordsFromElexicon'
